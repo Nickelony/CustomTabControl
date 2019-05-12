@@ -714,6 +714,8 @@ namespace System.Windows.Forms
 			}
 			else
 				base.OnMouseClick(e); // Fire the base event
+
+			Invalidate();
 		}
 
 		protected virtual void OnTabImageClick(TabControlEventArgs e)

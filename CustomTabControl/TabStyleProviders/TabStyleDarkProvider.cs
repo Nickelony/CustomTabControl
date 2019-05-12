@@ -9,20 +9,31 @@ namespace System.Windows.Forms
 	{
 		public TabStyleDarkProvider(CustomTabControl tabControl) : base(tabControl)
 		{
-			_TextColor = Color.White;
-			_TextColorSelected = Color.White;
+			_BorderColor = Color.FromArgb(96, 96, 96);
+			_BorderColorHot = Color.FromArgb(96, 96, 96);
+			_BorderColorSelected = Color.FromArgb(96, 96, 96);
+			_TextColor = Color.FromArgb(153, 153, 153);
+			_TextColorSelected = Color.FromArgb(152, 196, 232);
+			_TextColorDisabled = Color.FromArgb(96, 96, 96);
 			_CloserColor = Color.White;
-			_CloserColorActive = Color.FromArgb(128, 128, 128);
-			_FocusColor = Color.FromArgb(128, 128, 128);
-			_FocusTrack = true;
+			_CloserColorActive = Color.FromArgb(152, 196, 232);
+
+			_HotTrack = false;
+			_FocusTrack = false;
+
+			_Radius = 10;
+			_Overlap = 0;
+			_Opacity = 1F;
+
+			_Padding = new Point(6, 3);
 		}
 
 		protected override Brush GetTabBackgroundBrush(int index)
 		{
 			if (_TabControl.SelectedIndex == index)
-				return new LinearGradientBrush(this.GetTabRect(index), Color.FromArgb(96, 96, 96), Color.FromArgb(96, 96, 96), LinearGradientMode.Vertical);
+				return new LinearGradientBrush(GetTabRect(index), Color.FromArgb(60, 63, 65), Color.FromArgb(60, 63, 65), LinearGradientMode.Vertical);
 			else
-				return new LinearGradientBrush(this.GetTabRect(index), Color.FromArgb(48, 48, 48), Color.FromArgb(48, 48, 48), LinearGradientMode.Vertical);
+				return new LinearGradientBrush(GetTabRect(index), Color.FromArgb(48, 48, 48), Color.FromArgb(48, 48, 48), LinearGradientMode.Vertical);
 		}
 
 		public override void AddTabBorder(GraphicsPath path, Rectangle tabBounds)
