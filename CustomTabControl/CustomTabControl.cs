@@ -271,6 +271,9 @@ namespace System.Windows.Forms
 			}
 		}
 
+		[Category("Behavior"), DefaultValue(false), RefreshProperties(RefreshProperties.All)]
+		public bool EnableMiddleClickTabClosing { get; set; }
+
 		#endregion Public properties
 
 		#region	Extension methods
@@ -721,7 +724,8 @@ namespace System.Windows.Forms
 				OnTabImageClick(new TabControlEventArgs(TabPages[index], index, TabControlAction.Selected));
 				base.OnMouseClick(e); // Fire the base event
 			}
-			else if (!DesignMode && index > -1 && _StyleProvider.ShowTabCloser && GetTabCloserRect(index).Contains(MousePosition))
+			else if (!DesignMode && index > -1 && _StyleProvider.ShowTabCloser && GetTabCloserRect(index).Contains(MousePosition)
+				|| e.Button == MouseButtons.Middle && EnableMiddleClickTabClosing)
 			{
 				// If we are clicking on a closer then remove the tab instead of raising the standard mouse click event
 				// but raise the tab closing event first
