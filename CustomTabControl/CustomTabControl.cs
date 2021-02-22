@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -66,9 +64,6 @@ namespace System.Windows.Forms
 
 				if (_TabBuffer != null)
 					_TabBuffer.Dispose();
-
-				if (_StyleProvider != null)
-					_StyleProvider.Dispose();
 			}
 		}
 
@@ -82,7 +77,7 @@ namespace System.Windows.Forms
 		private Bitmap _TabBuffer;
 		private Graphics _TabBufferGraphics;
 
-		private int _oldValue;
+		private int _OldValue;
 
 		private TabStyle _Style;
 		private TabStyleProvider _StyleProvider;
@@ -189,7 +184,6 @@ namespace System.Windows.Forms
 		// Hide the Appearance attribute so it can not be changed.
 		// We don't want it as we are doing all the painting.
 		[Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
-		[SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value")]
 		public new TabAppearance Appearance
 		{
 			get { return base.Appearance; }
@@ -209,16 +203,15 @@ namespace System.Windows.Forms
 					return new Rectangle(0, 0, Width, Height);
 				else
 				{
-					int tabStripHeight = 0;
-					int itemHeight = 0;
+					int itemHeight;
 
 					if (Alignment <= TabAlignment.Bottom)
 						itemHeight = ItemSize.Height;
 					else
 						itemHeight = ItemSize.Width;
 
-					tabStripHeight = 5 + (itemHeight * RowCount);
-					Rectangle rect = new Rectangle(4, tabStripHeight, Width - 8, Height - tabStripHeight - 4);
+					int tabStripHeight = 5 + (itemHeight * RowCount);
+					var rect = new Rectangle(4, tabStripHeight, Width - 8, Height - tabStripHeight - 4);
 
 					switch (Alignment)
 					{
@@ -249,7 +242,7 @@ namespace System.Windows.Forms
 		{
 			get
 			{
-				NativeMethods.TCHITTESTINFO hitTestInfo = new NativeMethods.TCHITTESTINFO(PointToClient(Control.MousePosition));
+				var hitTestInfo = new NativeMethods.TCHITTESTINFO(PointToClient(Control.MousePosition));
 				int index = NativeMethods.SendMessage(Handle, NativeMethods.TCM_HITTEST, IntPtr.Zero, NativeMethods.ToIntPtr(hitTestInfo)).ToInt32();
 
 				if (index == -1)
@@ -281,6 +274,35 @@ namespace System.Windows.Forms
 		#endregion Public properties
 
 		#region	Extension methods
+
+		public void CloseTab(TabPage page)
+		{
+			if (page != null && TabPages.Contains(page))
+			{
+				int index = TabPages.IndexOf(page);
+				var args = new TabControlCancelEventArgs(page, index, false, TabControlAction.Deselecting);
+
+				OnTabClosing(args);
+
+				if (!args.Cancel)
+				{
+					TabPages.Remove(page);
+					page.Dispose();
+				}
+			}
+		}
+
+		public void CloseTab(int index)
+		{
+			if (IsValidTabIndex(index))
+				CloseTab(_TabPages[index]);
+		}
+
+		public void CloseTab(string key)
+		{
+			if (TabPages.ContainsKey(key))
+				CloseTab(TabPages[key]);
+		}
 
 		public void HideTab(TabPage page)
 		{
@@ -444,7 +466,7 @@ namespace System.Windows.Forms
 			if (e.Data.GetData(typeof(TabPage)) == null)
 				return;
 
-			TabPage draggedTab = (TabPage)e.Data.GetData(typeof(TabPage));
+			var draggedTab = (TabPage)e.Data.GetData(typeof(TabPage));
 			int draggedTabIndex = TabPages.IndexOf(draggedTab);
 			int hoveredTabIndex = GetHoveredTabIndex();
 
@@ -513,11 +535,14 @@ namespace System.Windows.Forms
 
 		#region Events
 
-		[Category("Action")] public event ScrollEventHandler HScroll;
+		[Category("Action")]
+		public event ScrollEventHandler HScroll;
 
-		[Category("Action")] public event EventHandler<TabControlEventArgs> TabImageClick;
+		[Category("Action")]
+		public event EventHandler<TabControlEventArgs> TabImageClick;
 
-		[Category("Action")] public event EventHandler<TabControlCancelEventArgs> TabClosing;
+		[Category("Action")]
+		public event EventHandler<TabControlCancelEventArgs> TabClosing;
 
 		#endregion Events
 
@@ -667,7 +692,6 @@ namespace System.Windows.Forms
 		}
 
 		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-		[DebuggerStepThrough()]
 		protected override void WndProc(ref Message m)
 		{
 			switch (m.Msg)
@@ -675,7 +699,7 @@ namespace System.Windows.Forms
 				case NativeMethods.WM_HSCROLL:
 					// Raise the scroll event when the scroller is scrolled
 					base.WndProc(ref m);
-					OnHScroll(new ScrollEventArgs(((ScrollEventType)NativeMethods.LoWord(m.WParam)), _oldValue, NativeMethods.HiWord(m.WParam), ScrollOrientation.HorizontalScroll));
+					OnHScroll(new ScrollEventArgs((ScrollEventType)NativeMethods.LoWord(m.WParam), _OldValue, NativeMethods.HiWord(m.WParam), ScrollOrientation.HorizontalScroll));
 					break;
 
 				default:
@@ -701,16 +725,7 @@ namespace System.Windows.Forms
 			{
 				// If we are clicking on a closer then remove the tab instead of raising the standard mouse click event
 				// but raise the tab closing event first
-				TabPage tab = ActiveTab;
-				TabControlCancelEventArgs args = new TabControlCancelEventArgs(tab, index, false, TabControlAction.Deselecting);
-
-				OnTabClosing(args);
-
-				if (!args.Cancel)
-				{
-					TabPages.Remove(tab);
-					tab.Dispose();
-				}
+				CloseTab(ActiveTab);
 			}
 			else
 				base.OnMouseClick(e); // Fire the base event
@@ -737,7 +752,7 @@ namespace System.Windows.Forms
 			HScroll?.Invoke(this, e);
 
 			if (e.Type == ScrollEventType.EndScroll)
-				_oldValue = e.NewValue;
+				_OldValue = e.NewValue;
 		}
 
 		#endregion Base class event processing
@@ -757,8 +772,6 @@ namespace System.Windows.Forms
 			// Equally the .Net 2.0 BufferedGraphics object causes the background painting
 			// to mess up, which is why we use this .Net 1.1 buffering technique.
 
-			// Buffer code from Gil. Schmidt http://www.codeproject.com/KB/graphics/DoubleBuffering.aspx
-
 			if (Width > 0 && Height > 0)
 			{
 				if (_BackImage == null)
@@ -766,7 +779,7 @@ namespace System.Windows.Forms
 					// Cached Background Image
 					_BackImage = new Bitmap(Width, Height);
 
-					Graphics backGraphics = Graphics.FromImage(_BackImage);
+					var backGraphics = Graphics.FromImage(_BackImage);
 					backGraphics.Clear(Color.Transparent);
 
 					PaintTransparentBackground(backGraphics, ClientRectangle);
@@ -816,13 +829,13 @@ namespace System.Windows.Forms
 				// Paint the tabs on top of the background
 
 				// Create a new color matrix and set the alpha value to 0.5
-				ColorMatrix alphaMatrix = new ColorMatrix();
+				var alphaMatrix = new ColorMatrix();
 				alphaMatrix.Matrix00 = alphaMatrix.Matrix11 = alphaMatrix.Matrix22 = alphaMatrix.Matrix44 = 1;
 				alphaMatrix.Matrix33 = _StyleProvider.Opacity;
 
 				// Create a new image attribute object and set the color matrix to
 				// the one just created.
-				using (ImageAttributes alphaAttributes = new ImageAttributes())
+				using (var alphaAttributes = new ImageAttributes())
 				{
 					alphaAttributes.SetColorMatrix(alphaMatrix);
 
@@ -863,7 +876,7 @@ namespace System.Windows.Forms
 				graphics.SmoothingMode = SmoothingMode.HighSpeed;
 
 				// Paint the parent
-				PaintEventArgs e = new PaintEventArgs(graphics, clipRect);
+				var e = new PaintEventArgs(graphics, clipRect);
 
 				try
 				{
@@ -920,7 +933,7 @@ namespace System.Windows.Forms
 			else
 				borderColor = _StyleProvider.BorderColor;
 
-			using (Pen borderPen = new Pen(borderColor))
+			using (var borderPen = new Pen(borderColor))
 				graphics.DrawPath(borderPen, path);
 		}
 
@@ -988,7 +1001,7 @@ namespace System.Windows.Forms
 		{
 			StringFormat format = null;
 
-			// Rotate Text by 90 degrees for left and right tabs
+			// Rotate text by 90 degrees for left and right tabs
 			switch (Alignment)
 			{
 				case TabAlignment.Top:
@@ -1011,7 +1024,7 @@ namespace System.Windows.Forms
 				format.HotkeyPrefix = Drawing.Text.HotkeyPrefix.Hide;
 
 			if (RightToLeft == RightToLeft.Yes)
-				format.FormatFlags = format.FormatFlags | StringFormatFlags.DirectionRightToLeft;
+				format.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
 
 			return format;
 		}
@@ -1022,7 +1035,7 @@ namespace System.Windows.Forms
 
 		private GraphicsPath GetTabPageBorder(int index)
 		{
-			GraphicsPath path = new GraphicsPath();
+			var path = new GraphicsPath();
 			Rectangle pageBounds = GetPageBounds(index);
 			Rectangle tabBounds = _StyleProvider.GetTabRect(index);
 
@@ -1049,7 +1062,7 @@ namespace System.Windows.Forms
 
 		private Rectangle GetTabTextRect(int index)
 		{
-			Rectangle textRect = new Rectangle();
+			Rectangle textRect;
 
 			using (GraphicsPath path = _StyleProvider.GetTabBorder(index))
 			{
@@ -1314,7 +1327,7 @@ namespace System.Windows.Forms
 
 		private Rectangle GetTabImageRect(GraphicsPath tabBorderPath)
 		{
-			Rectangle imageRect = new Rectangle();
+			Rectangle imageRect;
 			RectangleF rect = tabBorderPath.GetBounds();
 
 			// Make it shorter or thinner to fit the height or width because of the padding added to the tab for painting
@@ -1402,7 +1415,7 @@ namespace System.Windows.Forms
 
 		public Rectangle GetTabCloserRect(int index)
 		{
-			Rectangle closerRect = new Rectangle();
+			Rectangle closerRect;
 
 			using (GraphicsPath path = _StyleProvider.GetTabBorder(index))
 			{

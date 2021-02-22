@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -9,53 +8,25 @@ namespace System.Windows.Forms
 	{
 		#region Windows constants
 
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public const int WM_GETTABRECT = 0x130a;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public const int WS_EX_TRANSPARENT = 0x20;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public const int WM_SETFONT = 0x30;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public const int WM_FONTCHANGE = 0x1d;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public const int WM_HSCROLL = 0x114;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public const int TCM_HITTEST = 0x130D;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public const int WM_PAINT = 0xf;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public const int WS_EX_LAYOUTRTL = 0x400000;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public const int WS_EX_NOINHERITLAYOUT = 0x100000;
 
 		#endregion Windows constants
 
 		#region Content alignment
 
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public static readonly ContentAlignment AnyRightAlign = ContentAlignment.BottomRight | ContentAlignment.MiddleRight | ContentAlignment.TopRight;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public static readonly ContentAlignment AnyLeftAlign = ContentAlignment.BottomLeft | ContentAlignment.MiddleLeft | ContentAlignment.TopLeft;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public static readonly ContentAlignment AnyTopAlign = ContentAlignment.TopRight | ContentAlignment.TopCenter | ContentAlignment.TopLeft;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public static readonly ContentAlignment AnyBottomAlign = ContentAlignment.BottomRight | ContentAlignment.BottomCenter | ContentAlignment.BottomLeft;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public static readonly ContentAlignment AnyMiddleAlign = ContentAlignment.MiddleRight | ContentAlignment.MiddleCenter | ContentAlignment.MiddleLeft;
-
-		[SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
 		public static readonly ContentAlignment AnyCenterAlign = ContentAlignment.BottomCenter | ContentAlignment.MiddleCenter | ContentAlignment.TopCenter;
 
 		#endregion Content alignment
@@ -64,13 +35,13 @@ namespace System.Windows.Forms
 
 		public static IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam)
 		{
-			// This Method replaces the User32 method SendMessage, but will only work for sending messages to Managed controls.
-			Control control = Control.FromHandle(hWnd);
+			// This method replaces the User32 method SendMessage, but will only work for sending messages to Managed controls.
+			var control = Control.FromHandle(hWnd);
 
 			if (control == null)
 				return IntPtr.Zero;
 
-			Message message = new Message
+			var message = new Message
 			{
 				HWnd = hWnd,
 				LParam = lParam,
@@ -104,13 +75,11 @@ namespace System.Windows.Forms
 				return (dWord.ToInt32() >> 16) & 0xffff;
 		}
 
-		[SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts")]
-		[SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands")]
 		public static IntPtr ToIntPtr(object structure)
 		{
-			IntPtr lparam = IntPtr.Zero;
-			lparam = Marshal.AllocCoTaskMem(Marshal.SizeOf(structure));
+			IntPtr lparam = Marshal.AllocCoTaskMem(Marshal.SizeOf(structure));
 			Marshal.StructureToPtr(structure, lparam, false);
+
 			return lparam;
 		}
 
@@ -118,7 +87,7 @@ namespace System.Windows.Forms
 
 		#region Windows structures and enums
 
-		[Flags()]
+		[Flags]
 		public enum TCHITTESTFLAGS
 		{
 			TCHT_NOWHERE = 1,
@@ -171,10 +140,10 @@ namespace System.Windows.Forms
 
 			public RECT(Rectangle r)
 			{
-				this.left = r.Left;
-				this.top = r.Top;
-				this.right = r.Right;
-				this.bottom = r.Bottom;
+				left = r.Left;
+				top = r.Top;
+				right = r.Right;
+				bottom = r.Bottom;
 			}
 
 			public static RECT FromXYWH(int x, int y, int width, int height)
@@ -184,13 +153,12 @@ namespace System.Windows.Forms
 
 			public static RECT FromIntPtr(IntPtr ptr)
 			{
-				RECT rect = (RECT)Marshal.PtrToStructure(ptr, typeof(RECT));
-				return rect;
+				return (RECT)Marshal.PtrToStructure(ptr, typeof(RECT));
 			}
 
 			public Size Size
 			{
-				get { return new Size(this.right - this.left, this.bottom - this.top); }
+				get { return new Size(right - left, bottom - top); }
 			}
 		}
 

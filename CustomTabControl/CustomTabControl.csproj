@@ -35,7 +35,6 @@
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomTabControl.cs">
@@ -44,19 +43,10 @@
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TabStyle.cs" />
-    <Compile Include="TabStyleProvider.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="TabStyleProviders\TabStyleDarkProvider.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="TabStyleProviders\TabStyleDefaultProvider.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="TabStyleProviders\TabStyleNoneProvider.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ThemedColors.cs" />
+    <Compile Include="TabStyleProvider.cs" />
+    <Compile Include="TabStyleProviders\TabStyleDarkProvider.cs" />
+    <Compile Include="TabStyleProviders\TabStyleDefaultProvider.cs" />
+    <Compile Include="TabStyleProviders\TabStyleNoneProvider.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

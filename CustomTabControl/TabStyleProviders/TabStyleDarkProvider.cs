@@ -1,10 +1,8 @@
-﻿using System.ComponentModel;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 
 namespace System.Windows.Forms
 {
-	[ToolboxItem(false)]
 	public class TabStyleDarkProvider : TabStyleProvider
 	{
 		public TabStyleDarkProvider(CustomTabControl tabControl) : base(tabControl)

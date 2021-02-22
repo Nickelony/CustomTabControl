@@ -1,12 +1,10 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
 namespace System.Windows.Forms
 {
-	[ToolboxItem(false)]
-	public abstract class TabStyleProvider : Component
+	public abstract class TabStyleProvider
 	{
 		#region Constructor
 
@@ -65,61 +63,24 @@ namespace System.Windows.Forms
 
 		#region	Protected variables
 
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected CustomTabControl _TabControl;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Point _Padding;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected bool _HotTrack;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected TabStyle _Style = TabStyle.Default;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected ContentAlignment _ImageAlign;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected int _Radius = 2;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected int _Overlap;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected bool _FocusTrack;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected float _Opacity = 1;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected bool _ShowTabCloser;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Color _BorderColorSelected = Color.Empty;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Color _BorderColor = Color.Empty;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Color _BorderColorHot = Color.Empty;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Color _CloserColorActive = Color.Black;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Color _CloserColor = Color.DarkGray;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Color _FocusColor = Color.Empty;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Color _TextColor = Color.Empty;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Color _TextColorSelected = Color.Empty;
-
-		[SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
 		protected Color _TextColorDisabled = Color.Empty;
 
 		#endregion Protected variables
@@ -183,7 +144,6 @@ namespace System.Windows.Forms
 			return tabBounds;
 		}
 
-		[SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", MessageId = "0#")]
 		protected virtual void EnsureFirstTabIsInView(ref Rectangle tabBounds, int index)
 		{
 			// Adjust first tab in the row to align with tabPage.
@@ -253,8 +213,8 @@ namespace System.Windows.Forms
 			LinearGradientBrush fillBrush = null;
 
 			// Capture the colors dependant on selection state of the tab
-			Color dark = Color.FromArgb(207, 207, 207);
-			Color light = Color.FromArgb(242, 242, 242);
+			var dark = Color.FromArgb(207, 207, 207);
+			var light = Color.FromArgb(242, 242, 242);
 
 			if (_TabControl.SelectedIndex == index)
 			{
@@ -336,17 +296,17 @@ namespace System.Windows.Forms
 				// This line will trigger the handle to recreate, therefore invalidating the control
 				if (_ShowTabCloser)
 				{
-					if (value.X + (int)(_Radius / 2) < -6)
+					if (value.X + (_Radius / 2) < -6)
 						((TabControl)_TabControl).Padding = new Point(0, value.Y);
 					else
-						((TabControl)_TabControl).Padding = new Point(value.X + (int)(_Radius / 2) + 6, value.Y);
+						((TabControl)_TabControl).Padding = new Point(value.X + (_Radius / 2) + 6, value.Y);
 				}
 				else
 				{
-					if (value.X + (int)(_Radius / 2) < 1)
+					if (value.X + (_Radius / 2) < 1)
 						((TabControl)_TabControl).Padding = new Point(0, value.Y);
 					else
-						((TabControl)_TabControl).Padding = new Point(value.X + (int)(_Radius / 2) - 1, value.Y);
+						((TabControl)_TabControl).Padding = new Point(value.X + (_Radius / 2) - 1, value.Y);
 				}
 			}
 		}
@@ -428,20 +388,10 @@ namespace System.Windows.Forms
 		[Category("Appearance"), DefaultValue(typeof(Color), "")]
 		public Color BorderColorSelected
 		{
-			get
-			{
-				if (_BorderColorSelected.IsEmpty)
-					return ThemedColors.ToolBorder;
-				else
-					return _BorderColorSelected;
-			}
+			get { return _BorderColorSelected; }
 			set
 			{
-				if (value.Equals(ThemedColors.ToolBorder))
-					_BorderColorSelected = Color.Empty;
-				else
-					_BorderColorSelected = value;
-
+				_BorderColorSelected = value;
 				_TabControl.Invalidate();
 			}
 		}
@@ -618,12 +568,12 @@ namespace System.Windows.Forms
 				{
 					if (closerRect.Contains(_TabControl.MousePosition))
 					{
-						using (Pen closerPen = new Pen(_CloserColorActive))
+						using (var closerPen = new Pen(_CloserColorActive))
 							graphics.DrawPath(closerPen, closerPath);
 					}
 					else
 					{
-						using (Pen closerPen = new Pen(_CloserColor))
+						using (var closerPen = new Pen(_CloserColor))
 							graphics.DrawPath(closerPen, closerPath);
 					}
 				}
@@ -632,7 +582,7 @@ namespace System.Windows.Forms
 
 		protected static GraphicsPath GetCloserPath(Rectangle closerRect)
 		{
-			GraphicsPath closerPath = new GraphicsPath();
+			var closerPath = new GraphicsPath();
 
 			closerPath.AddLine(closerRect.X, closerRect.Y, closerRect.Right, closerRect.Bottom);
 			closerPath.CloseFigure();
@@ -674,7 +624,7 @@ namespace System.Windows.Forms
 				}
 
 				// Ensure the focus strip does not go outside the tab
-				Region focusRegion = new Region(focusRect);
+				var focusRegion = new Region(focusRect);
 				focusRegion.Intersect(tabpath);
 
 				graphics.FillRegion(focusBrush, focusRegion);
@@ -700,7 +650,7 @@ namespace System.Windows.Forms
 				relativePositions = new float[] { 0f, 0.5f, 0.51f, 1f };
 			}
 
-			Blend blend = new Blend
+			var blend = new Blend
 			{
 				Factors = relativeIntensities,
 				Positions = relativePositions
@@ -712,7 +662,7 @@ namespace System.Windows.Forms
 		public virtual Brush GetPageBackgroundBrush(int index)
 		{
 			// Capture the colors dependant on selection state of the tab
-			Color light = Color.FromArgb(242, 242, 242);
+			var light = Color.FromArgb(242, 242, 242);
 
 			if (_TabControl.Alignment == TabAlignment.Top)
 				light = Color.FromArgb(207, 207, 207);
@@ -733,7 +683,7 @@ namespace System.Windows.Forms
 
 		public GraphicsPath GetTabBorder(int index)
 		{
-			GraphicsPath path = new GraphicsPath();
+			var path = new GraphicsPath();
 			Rectangle tabBounds = GetTabRect(index);
 
 			AddTabBorder(path, tabBounds);
